@@ -1,0 +1,28 @@
+<!-- AIzaSyD8AkpdQ2LBirolGIl14FJ1fONPecm3DBE -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <title>Places Search Box</title>
+    <link rel="stylesheet" href="/css/main.css" type="text/css" > 
+</head>
+  <body>
+      <div id="symbol_place">
+        <img id="gps" class="symbol_place" src="https://img.icons8.com/windows/2x/map-pin.png" height="30px" width="30px" onclick="drawMap()">
+        <img id="all" class="symbol_place" src="../image/icon_all.png" height="30px" width="30px">
+        <img id="fire" class="symbol_place" src="../image/icon_fire.png" height="30px" width="30px">
+        <img id="restaurant" class="symbol_place" src="https://img.icons8.com/windows/2x/restaurant.png" height="30px" width="30px">
+        <img id="school" class="symbol_place" src="https://img.icons8.com/windows/2x/school-house.png" height="30px" width="30px">
+        <img id="hospital" class="symbol_place" src="https://img.icons8.com/windows/2x/hospital-3.png" height="30px" width="30px">
+      </div>
+      <div id = "input_search">
+        <input id="pac-input"  type="text" placeholder="Nhập địa điểm hiển thị">
+      </div>
+    <div id="map"></div>
+    <script src="js/main.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC_MbzpCBBPrMmvO4aLrc52vBXrsviNV6U&libraries=places&callback=initAutocomplete"
+         async defer></script>
+  </body>
+</html>

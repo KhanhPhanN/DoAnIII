@@ -1,0 +1,229 @@
+var myCenter = {lat:35.689487,lng:139.691711};
+var place_name="Vị trí hiện tại";
+function search_restaurant(){
+}
+function search_school(){
+}
+function search_hospital(){
+}
+var x_start;
+var y_start;
+function drawMap(){
+place_name="Vị trí của bạn";
+let options = {
+enableHighAccuracy: true,
+timeout: 5000,
+maximumAge: 0
+};
+let geolocation = navigator.geolocation;
+if (geolocation) {
+geolocation.getCurrentPosition(onGeoSuccess, onGeoError, options);
+} else {
+console.log("trinh duyệt của bạn không hỗ trợ Geolocation.");
+}
+
+function onGeoSuccess(position) {
+x_start = position.coords.latitude;
+y_start = position.coords.longitude;
+myCenter  = {lat: x_start, lng: y_start};
+//myCenter = {lat:35.689487,lng:139.691711}
+initAutocomplete(myCenter);
+}
+
+function onGeoError(error) {
+let detailError;
+if(error.code === error.PERMISSION_DENIED) {
+detailError = "người dùng từ chối chia sẻ vị trí.";
+} 
+else if(error.code === error.POSITION_UNAVAILABLE) {
+detailError = "thông tin vị trí không khả dụng.";
+} 
+else if(error.code === error.TIMEOUT) {
+detailError = "yêu cầu đã hết thời gian ."
+} 
+else if(error.code === error.UNKNOWN_ERROR) {
+detailError = "lỗi không xác định."
+}
+alert(detailError)
+}
+
+}
+//Change Place 
+function initAutocomplete() {
+ var infowindow_location = new google.maps.InfoWindow();
+  var map = new google.maps.Map(document.getElementById('map'), {
+    center: myCenter,
+    zoom: 11.5,
+    mapTypeId: 'roadmap'
+  });
+  var marker_location=new google.maps.Marker({
+                              map: map,
+                              position: myCenter,
+                              icon: "../image/marker_location.png"
+                              });
+              marker_location.setMap(map);
+              google.maps.event.addListener(marker_location, 'click', function() {
+    infowindow_location.setContent(place_name);
+    infowindow_location.open(map, this);
+  });
+
+  var around= new google.maps.Circle({
+          center: myCenter,
+          radius:10000,
+          strokeColor:"#0000FF",
+          strokeOpacity:0.8,
+          strokeWeight:2,
+          fillColor:"#C2D8EB",
+          fillOpacity:0.4
+        });
+ around.setMap(map);
+
+ var all = document.getElementById("all");
+ all.addEventListener("click", getTwitterData);
+ var fire = document.getElementById("fire");
+ fire.addEventListener("click", getTwitterDataFire);
+ var restaurant = document.getElementById("restaurant");
+ restaurant.addEventListener("click", getTwitterDataStore);
+ var school = document.getElementById("school");
+ school.addEventListener("click", getTwitterDataSchool);
+ var hospital = document.getElementById("hospital");
+ hospital.addEventListener("click", getTwitterDataHospital);
+  var input = document.getElementById('pac-input');
+  var autocomplete = new google.maps.places.Autocomplete(input);
+  autocomplete.bindTo('bounds', map);
+  // Specify just the place data fields that you need.
+  autocomplete.setFields(['place_id', 'geometry', 'name']);
+  map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+  autocomplete.addListener('place_changed', function() {
+    var place = autocomplete.getPlace();
+    if (!place.geometry) {
+     alert("Không tìm thấy vị trí");
+    }
+    else {
+      map.setCenter(place.geometry.location);
+      console.log(place.geometry.location)
+      myCenter = {lat: place.geometry.location.lat(), lng: place.geometry.location.lng()};
+      place_name=place.name;
+      marker_location.setPosition(myCenter);
+      around.setCenter(myCenter);
+      clearMarker();
+      getTwitterData();
+    }
+  });
+
+var array_marker = [];
+// Twitter data on Google map
+function createPlaceTwitter(places){
+var bounds = new google.maps.LatLngBounds();
+for (var i = 0, place; place = places[i]; i++) {
+var info="";
+for(var j = 0;j<place.twitter_post.length;j++){
+var detail_user = "<div><img src = "+ place.twitter_post[j].user.profile_image_url +"> <a target=\"_blank\" href = \"https://twitter.com/"+ place.twitter_post[j].user.display_name +"\"><p>"+ place.twitter_post[j].user.name +"</p></a><br/>"
+var detail_text = "<a target=\"_blank\" href = \"https://twitter.com/i/web/status/"+ place.twitter_post[j].id_str +"\"><div>"+ place.twitter_post[j].text +"</div></a></div><hr>"
+info+=detail_user+detail_text;
+}
+
+var infowindow2 = new google.maps.InfoWindow();
+var marker = new google.maps.Marker({
+map: map,
+icon: "../image/icon_twitter.png",
+title: place.twitter_post.length.toString(),
+position: place.location,
+//user: detail_user,
+label: place.twitter_post.length.toString(),
+text: info
+});
+array_marker.push(marker);
+//marker.setMap(map);
+    google.maps.event.addListener(marker, 'click', function() {
+    infowindow2.setContent(this.text);
+    infowindow2.open(map, this);
+              })
+bounds.extend(place.location);
+}
+map.fitBounds(bounds);
+}
+
+function clearMarker(){
+for(var i = 0 ; i<array_marker.length;i++){
+array_marker[i].setMap(null);
+}
+array_marker = [];
+} 
+
+// Get All Twitter Data
+function getTwitterData(){
+console.log(myCenter)
+axios.post('/getData',{radius: 10, location: myCenter})
+  .then((res)=>{
+     array = res.data;
+     if(array.length<1){
+       alert("Không có dữ liệu trong vùng được chọn")
+     }else{
+       clearMarker();
+       createPlaceTwitter(array)
+     }
+  })
+  .catch((err)=>console.log(err))
+}
+
+// Get Fire Twitter Data
+function getTwitterDataFire(){
+axios.post('/getDataFire',{radius: 10, location: myCenter, keyword:["火難","火事","火災", "発煙","煙の火","たばこを吸う","消防"]})
+  .then((res)=>{
+     arrayFire = res.data;
+     if(arrayFire.length<1){
+       alert("Không có dữ liệu trong vùng được chọn")
+     }else{
+       clearMarker();
+       createPlaceTwitter(arrayFire)
+     }
+  })
+  .catch((err)=>console.log(err))
+}
+
+// Get restaurant Twitter Data
+function getTwitterDataStore(){
+axios.post('/getDataStore',{radius: 10, location: myCenter, keyword:["レストラン", "食べ物屋", "料理店", "食堂", "飲食店", "料理屋","グリル","割烹店","料亭","食べ物","食物 "]})
+  .then((res)=>{
+     arrayStore = res.data;
+     if(arrayStore.length<1){
+       alert("Không có dữ liệu trong vùng được chọn")
+     }else{
+       clearMarker();
+       createPlaceTwitter(arrayStore)
+     }
+  })
+  .catch((err)=>console.log(err))
+}
+// Get school Twitter Data
+function getTwitterDataSchool(){
+axios.post('/getDataSchool',{radius: 10, location: myCenter, keyword:["学校","授業","学園","学院","スクール","学生たち","階級","先生"]})
+  .then((res)=>{
+     arraySchool = res.data;
+     if(arraySchool.length<1){
+       alert("Không có dữ liệu trong vùng được chọn")
+     }else{
+       clearMarker();
+       createPlaceTwitter(arraySchool)
+     }
+  })
+  .catch((err)=>console.log(err))
+}
+
+// Get hospital Twitter Data
+function getTwitterDataHospital(){
+axios.post('/getDataHospital',{radius: 10, location: myCenter, keyword:["病院","ホスピタル","医療ステーション","獣医病院","患者さん","医者","看護師","薬局"]})
+  .then((res)=>{
+     arrayHospital = res.data;
+     if(arrayHospital.length<1){
+       alert("Không có dữ liệu trong vùng được chọn")
+     }else{
+       clearMarker();
+       createPlaceTwitter(arrayHospital)
+     }
+  })
+  .catch((err)=>console.log(err))
+}
+
+}
