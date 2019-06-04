@@ -75,5 +75,6 @@ output {
 Chạy server elasticsearch bằng cửa sổ cmd dùng 2 câu lệnh trong thư mục bin của thư mục elasticsearch:
 1. set JAVA_HOME="link thư mục jre java"
 2. elasticsearch
+
 Dữ liệu lấy được sẽ được truy cập thông qua địa chỉ local: localhost:9200/....
  
