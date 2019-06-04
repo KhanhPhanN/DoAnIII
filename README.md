@@ -36,26 +36,42 @@ Cơ sở dữ liệu được lưu tại local với cách lấy dữ liệu t�
 File cấu hình của logstash: Dữ liệu hiện tại chỉ được lấy tại nhật bản , các khu vực khác trên thế giới chưa được thực hiện cấu hình để có thể lấy được dữ liệu
 
 input {
+
     twitter {
+    
         consumer_key => "yat6Gf2oCq266HWnLGuIVEX9Y"
+        
         consumer_secret => "4K0SGeeW8qZ1sO6ivaujWXfeqK6me0qeWlmNSPNwV7Dd2RHX6E"
+        
         oauth_token => "1096331330684502016-LRp9LjblZsthI7ltcINUSkP5TcEMZM"
+        
         oauth_token_secret => "JY2HlXgL9BLMsRvO6NCYYB295gx1IBwpI0sDUt6o63id0"
+        
         ignore_retweets => true
+        
         full_tweet => true
+        
         use_samples => false
+        
         languages =>["ja"]
+        
         locations =>"123,20,154,46"
+        
         # locations => "103,8,110,24"
     }
 }
 output {
+
     elasticsearch {
+    
         hosts => ["localhost:9200"]
+        
         index => "locationvn_ls"
+        
     }
     stdout {codec => rubydebug}
 }
+
 Chạy server elasticsearch bằng cửa sổ cmd dùng 2 câu lệnh trong thư mục bin của thư mục elasticsearch:
 1. set JAVA_HOME="link thư mục jre java"
 2. elasticsearch
